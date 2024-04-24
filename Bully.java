@@ -48,18 +48,40 @@ public class Bully {
     }
 
     void runElection(int process_id) {
-        coordinator = process_id;
+    // If the initiating process is not the coordinator, start the election
+    if (process_id != coordinator) {
+        System.out.println("Process P" + process_id + " initiates the election.");
         boolean keepGoing = true;
+        int highestProcessUp = process_id;
 
-        for(int i = process_id; i < max_processes && keepGoing; i++) {
-            System.out.println("Election message sent from process " + process_id + " to process " + (i+1));
+        // Iterate over processes starting from the initiating process
+        for (int i = process_id; i < max_processes && keepGoing; i++) {
+            System.out.println("Election message sent from process " + process_id + " to process " + (i + 1));
 
-            if(processes[i]) {
-                keepGoing = false;
-                runElection(i + 1);
+            // Check if the process is up
+            if (processes[i]) {
+                // Update the highest process that is up
+                highestProcessUp = i + 1;
             }
         }
+
+        // Check if the highest process up is different from the initiating process
+        if (highestProcessUp != process_id) {
+            // If so, start a new election from the highest process up
+            runElection(highestProcessUp);
+        } else {
+            // If no higher process is up, declare this process as the coordinator
+            coordinator = process_id;
+            System.out.println("Process P" + process_id + " becomes the coordinator.");
+        }
     }
+    // If the initiating process is already the coordinator, no need to start the election
+    else {
+        System.out.println("Process P" + process_id + " is already the coordinator. No need to start an election.");
+    }
+}
+
+
 
     public static void main(String args[]) {
         Bully bully = null;
